@@ -7,7 +7,10 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { validateEmail } from "../../utils/index";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { AUTH_RESET, register } from "../../redux/features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { Loader } from "../../components/loader/Loader";
 
 const initialState = {
   name: "",
@@ -19,6 +22,10 @@ function Register() {
   const [formData, setFormData] = useState(initialState);
   const { name, email, password, cPassword } = formData;
 
+  const { isLoggedIn, isSuccess, isLoading } = useSelector(
+    (state) => state.auth
+  );
+
   // const dispatch = useDispatch();
 
   /* To Check and Validate the password is matching the criteria or not */
@@ -26,6 +33,9 @@ function Register() {
   const [num, setNum] = useState(false);
   const [sChar, setSChar] = useState(false);
   const [passLen, setPassLen] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const registerUser = async (e) => {
     e.preventDefault(); /* To stop the form from re-loading we need this call */
@@ -49,9 +59,16 @@ function Register() {
       email,
       password,
     };
-    //await dispatch(register(userData));
+    await dispatch(register(userData));
   };
 
+  useEffect(() => {
+    console.log("Inside UseEffect for Navigating:", isLoggedIn, isSuccess);
+    if (isLoggedIn && isSuccess) navigate("/");
+    dispatch(AUTH_RESET);
+  }, [isLoggedIn, isSuccess, isLoading, navigate, dispatch]);
+
+  /* Whenever there is change in password(Dependency array) field this piece of code will run and re-render the whole component */
   useEffect(() => {
     console.log("UseEffect Has called");
     if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) setUCase(true);
@@ -69,7 +86,7 @@ function Register() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
+    // console.log(name, value);
     setFormData({ ...formData, [name]: value });
   };
 
@@ -80,7 +97,9 @@ function Register() {
     return condition ? greenTickIcon : crossCheckIcon;
   };
 
-  return (
+  return isLoading ? (
+    <Loader />
+  ) : (
     <div className={`container ${styles.auth}`}>
       <Card>
         <div className={styles.form}>
@@ -151,7 +170,7 @@ function Register() {
                 </li>
               </ul>
             </Card>
-            <button className="--btn --btn-primary --btn-block">
+            <button type="submit" className="--btn --btn-primary --btn-block">
               Register
             </button>
           </form>

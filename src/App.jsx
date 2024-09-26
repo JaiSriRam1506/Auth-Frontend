@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
 import Register from "./pages/auth/Register";
+import Home from "./pages/home/Home";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
         </Routes>
       </BrowserRouter>
       <Toaster
